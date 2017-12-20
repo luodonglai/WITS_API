@@ -56,9 +56,14 @@ sv_indi = json_totalimport['structure']['dimensions']['series'][4]['values'][0][
 
 # combine all the results
 # obtain a good shape dataframe as container
- df_combined = pd.DataFrame(pd.np.empty((sl_year.shape[0] , 7)), columns = {'year', 'value', 'freq', 'report', 'partner', 'prod', 'indi'})
+df_combined = pd.DataFrame(pd.np.empty((sl_year.shape[0] , 7)), columns = {'year', 'value', 'freq', 'report', 'partner', 'prod', 'indi'})
 
- df_combined['year'] = sl_year['year']
- df_combined['value'] = sl_obs['value']
+df_combined['year'] = sl_year['year']
+df_combined['value'] = sl_obs['value']
+df_combined['report'] = sv_reporter
+df_combined['partner'] = sv_partner
+df_combined['prod'] = sv_prod
+df_combined['indi'] = sv_indi
+ 
 
 
