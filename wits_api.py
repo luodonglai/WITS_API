@@ -9,6 +9,44 @@ import json, requests
 # import pandasdmx as pdsx
 # get data availability
 
+def get_all_info(url):
+    """
+
+    :param url: url of xml
+    :return: dataframe  of all info
+    """
+
+    xml_page = rq.urlopen(url)
+
+    root = ET.fromstring(xml_page.read())
+
+    result = []
+
+    for child_l1 in root.getchildren():
+        # level 1: indicators
+        for child_l2 in child_l1:
+            # level 2: indicator
+            tmp = {}
+            tmp = child_l2.attrib
+            for child_l3 in child_l2.getchildren():
+                # level 3 (last level)
+                tmp[child_l3.tag.split('}')[1]] = child_l3.text
+            result.append(tmp)
+
+    data_frame_result = pd.DataFrame(result)
+
+    return data_frame_result
+
+
+if __name__ == '__main__':
+    info = get_all_info('http://wits.worldbank.org/API/V1/wits/datasource/tradestats-trade/indicator/ALL?format=JSON')
+
+    print(info)
+
+# For the country data availability http://wits.worldbank.org/API/V1/wits/datasource/tradestats-trade/dataavailability/
+
+
+
 # get available indicators
 
 indi = rq.urlopen('http://wits.worldbank.org/API/V1/wits/datasource/tradestats-trade/indicator/ALL?format=JSON')
@@ -91,24 +129,32 @@ def wits_trade(rpt = 'usa', ptn = 'chn', pcd = 'Total', idt = 'MPRT-TRD-VL', yr_
 # start the loop  for required data
 
 # read the iso-3 list from disk
-
 iso_all = pd.read_excel('D:/dropbox/Dropbox/LKY_RA/trilemma/WITS_API/iso_list.xlsx', header = 0)
 iso3 = iso_all['iso3']
 iso3.to_string
+
+# or we may get the available country list from the server
+# otherwise it is too slow
+aval_country = get_all_info('http://wits.worldbank.org/API/V1/wits/datasource/tradestats-trade/dataavailability/')['iso3Code']
+
+list_country = set(aval_country)
+'USA' in list_country
+
 # list required product code
 pcd_rqst = {'Total', 'UNCTAD-SoP1' , 'UNCTAD-SoP2', 'UNCTAD-SoP3', 'UNCTAD-SoP4'}
 
 # define the indicator in request
 idt_rqst = {'MPRT-TRD-VL','XPRT-TRD-VL' }
 
+# set empty containers and counters
 rn = 0
 pn = 0
 cn = 0
 dn = 0
 df_combined = pd.DataFrame({})
-for rp_country in iso3 :
+for rp_country in list_country :
     rn = rn + 1
-    for pt_country in iso3:
+    for pt_country in list_country:
         pn = pn + 1
         for pcdrq in pcd_rqst:
             cn = cn + 1
@@ -117,7 +163,15 @@ for rp_country in iso3 :
                  try: 
                      df_target = wits_trade(rp_country, pt_country , pcdrq, idtrq)
                  except Exception:
-                     pass
+                     print(("something is wrong in " + rp_country + '-'+ pt_country + '-' + pcdrq  + '-' + idtrq))
                  else: 
-                     df_combined.append(df_target, ignore_index=True)
+                     df_combined = df_combined.append(df_target, ignore_index=True)
+                     print("Successful: " + rp_country + '-'+ pt_country + '-' + pcdrq + '-' + idtrq)
+                 finally:
+                     print([rn, pn, cn, dn])
+                 
+                    
+
+# write the data file to disk
+df_combined.to_csv('D:/dropbox/Dropbox/LKY_RA/trilemma/WITS_API/test.csv')
             
