@@ -140,6 +140,12 @@ aval_country = get_all_info('http://wits.worldbank.org/API/V1/wits/datasource/tr
 list_country = set(aval_country)
 'USA' in list_country
 
+# here we choose to match the available country we have in the FX-IR data, which amounts to 80. 
+
+list_fx = pd.read_csv("d:/dropbox/Dropbox/InProgress/Data/Trilemma/fx_ir_source_data.csv")
+country_fx = set(list_fx['Iso Country'])
+country_fx.add('USA')
+
 # list required product code
 pcd_rqst = {'Total', 'UNCTAD-SoP1' , 'UNCTAD-SoP2', 'UNCTAD-SoP3', 'UNCTAD-SoP4'}
 
@@ -152,9 +158,10 @@ pn = 0
 cn = 0
 dn = 0
 df_combined = pd.DataFrame({})
-for rp_country in list_country :
+
+for rp_country in country_fx :
     rn = rn + 1
-    for pt_country in list_country:
+    for pt_country in country_fx:
         pn = pn + 1
         for pcdrq in pcd_rqst:
             cn = cn + 1
