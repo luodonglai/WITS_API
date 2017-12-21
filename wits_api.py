@@ -34,7 +34,7 @@ def wits_trade(rpt = 'usa', ptn = 'chn', pcd = 'Total', idt = 'MPRT-TRD-VL', yr_
     # add this since there is no dash
     posturl = idt + tail
 
-    full_url = dashjoin.join( (preurl, rpt ,rpurl , yrurl, yr_def, pturl , ptn, pcurl, pcd, idurl, posturl) )
+    full_url = dashjoin.join( (preurl, rpurl ,rpt , yrurl, yr_def, pturl , ptn, pcurl, pcd, idurl, posturl) )
 
     # response_totalimport = requests.get("http://wits.worldbank.org/API/V1/SDMX/V21/datasource/tradestats-trade/reporter/usa/year/all/partner/chn/product/Total/indicator/MPRT-TRD-VL?format=JSON")
     response_totalimport = requests.get(full_url)
@@ -88,5 +88,36 @@ def wits_trade(rpt = 'usa', ptn = 'chn', pcd = 'Total', idt = 'MPRT-TRD-VL', yr_
     return(df_combined)
 
 
+# start the loop  for required data
 
-test = wits_trade()
+# read the iso-3 list from disk
+
+iso_all = pd.read_excel('D:/dropbox/Dropbox/LKY_RA/trilemma/WITS_API/iso_list.xlsx', header = 0)
+iso3 = iso_all['iso3']
+iso3.to_string
+# list required product code
+pcd_rqst = {'Total', 'UNCTAD-SoP1' , 'UNCTAD-SoP2', 'UNCTAD-SoP3', 'UNCTAD-SoP4'}
+
+# define the indicator in request
+idt_rqst = {'MPRT-TRD-VL','XPRT-TRD-VL' }
+
+rn = 0
+pn = 0
+cn = 0
+dn = 0
+df_combined = pd.DataFrame({})
+for rp_country in iso3 :
+    rn = rn + 1
+    for pt_country in iso3:
+        pn = pn + 1
+        for pcdrq in pcd_rqst:
+            cn = cn + 1
+            for idtrq in idt_rqst:
+                 dn = dn + 1
+                 try: 
+                     df_target = wits_trade(rp_country, pt_country , pcdrq, idtrq)
+                 except Exception:
+                     pass
+                 else: 
+                     df_combined.append(df_target, ignore_index=True)
+            
