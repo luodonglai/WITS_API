@@ -167,7 +167,7 @@ country_fx = set(list_fx['Iso Country'])
 country_fx.add('USA')
 
 # list required product code
-pcd_rqst = {'Total', 'UNCTAD-SoP1' , 'UNCTAD-SoP2', 'UNCTAD-SoP3', 'UNCTAD-SoP4'}
+pcd_rqst = {'Total', 'UNCTAD-SoP1' , 'UNCTAD-SoP2', 'UNCTAD-SoP3', 'UNCTAD-SoP4', }
 
 # define the indicator in request
 idt_rqst = {'MPRT-TRD-VL','XPRT-TRD-VL' }
@@ -181,21 +181,20 @@ df_combined = pd.DataFrame({})
 
 for rp_country in country_fx :
     rn = rn + 1
-    for pt_country in country_fx:
-        pn = pn + 1
-        for pcdrq in pcd_rqst:
+    pt_country = 'all'
+    for pcdrq in pcd_rqst:
             cn = cn + 1
             for idtrq in idt_rqst:
-                 dn = dn + 1
-                 try: 
-                     df_target = wits_trade(rp_country, pt_country , pcdrq, idtrq)
-                 except Exception:
-                     print(("something is wrong in " + rp_country + '-'+ pt_country + '-' + pcdrq  + '-' + idtrq))
-                 else: 
-                     df_combined = df_combined.append(df_target, ignore_index=True)
-                     print("Successful: " + rp_country + '-'+ pt_country + '-' + pcdrq + '-' + idtrq)
-                 finally:
-                     print([rn, pn, cn, dn])
+                dn = dn + 1
+                try: 
+                   df_target = wits_trade(rp_country, pt_country , pcdrq, idtrq)
+                except Exception:
+                        print(("something is wrong in " + rp_country + '-'+ pt_country + '-' + pcdrq  + '-' + idtrq))
+                else: 
+                        df_combined = df_combined.append(df_target, ignore_index=True)
+                        print("Successful: " + rp_country + '-'+ pt_country + '-' + pcdrq + '-' + idtrq)
+                finally:
+                        print([rn, pn, cn, dn])
                  
                     
 
