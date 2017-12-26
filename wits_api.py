@@ -55,6 +55,7 @@ test = et.parse(indi)
 indi_list = et.tostring(test, pretty_print = True)
 
 # define single countr-partner-year-indicator-prodcut parser
+
 def trade_parser(json_url = "http://wits.worldbank.org/API/V1/SDMX/V21/datasource/tradestats-trade/reporter/usa/year/all/partner/chn/product/Total/indicator/MPRT-TRD-VL?format=JSON"):
     response_totalimport = requests.get(json_url)
     json_totalimport = response_totalimport.json()
@@ -111,9 +112,9 @@ def trade_parser(json_url = "http://wits.worldbank.org/API/V1/SDMX/V21/datasourc
         # iterate to fill in the value
         for year in range(sl_year.shape[0]):
             if str(year) in sv_obs.keys():
-                df_combined['value'][year] = sv_obs[str(year)][0]
+                df_combined.loc[year, 'value'] = sv_obs[str(year)][0]
             else:
-                df_combined['value'][year] = 0
+                df_combined.loc[year, 'value'] = 0
 
         # combine all the results to get one reporter - all partner - all yr
         df_obtained = df_obtained.append(df_combined, ignore_index = True)
@@ -201,3 +202,8 @@ for rp_country in country_fx :
 # write the data file to disk
 df_combined.to_csv('D:/dropbox/Dropbox/LKY_RA/trilemma/WITS_API/test.csv')
             
+if __name__ == '__main__':
+    import time
+    start_time = time.time()
+    wits_trade(ptn = 'all')
+    print("--- %s seconds ---" % (time.time() - start_time))
