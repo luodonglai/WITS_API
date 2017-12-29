@@ -147,6 +147,13 @@ def wits_trade(rpt = 'usa', ptn = 'chn', pcd = 'Total', idt = 'MPRT-TRD-VL', yr_
     return(df_target)
 
 
+            
+if __name__ == '__main__':
+    import time
+    start_time = time.time()
+    wits_trade(ptn = 'all')
+    print("--- %s seconds ---" % (time.time() - start_time))
+
 # start the loop  for required data
 
 # read the iso-3 list from disk
@@ -168,7 +175,7 @@ country_fx = set(list_fx['Iso Country'])
 country_fx.add('USA')
 
 # list required product code
-pcd_rqst = {'Total', 'UNCTAD-SoP1' , 'UNCTAD-SoP2', 'UNCTAD-SoP3', 'UNCTAD-SoP4', }
+pcd_rqst = {'Total' }
 
 # define the indicator in request
 idt_rqst = {'MPRT-TRD-VL','XPRT-TRD-VL' }
@@ -180,7 +187,7 @@ cn = 0
 dn = 0
 df_combined = pd.DataFrame({})
 
-for rp_country in country_fx :
+for rp_country in list_country:
     rn = rn + 1
     pt_country = 'all'
     for pcdrq in pcd_rqst:
@@ -200,10 +207,17 @@ for rp_country in country_fx :
                     
 
 # write the data file to disk
-df_combined.to_csv('D:/dropbox/Dropbox/LKY_RA/trilemma/WITS_API/test.csv')
-            
-if __name__ == '__main__':
-    import time
-    start_time = time.time()
-    wits_trade(ptn = 'all')
-    print("--- %s seconds ---" % (time.time() - start_time))
+df_combined.to_csv('D:/dropbox/Dropbox/LKY_RA/trilemma/WITS_API/total.csv')
+
+# read from data file
+df_total = pd.DataFrame.from_csv('D:/dropbox/Dropbox/LKY_RA/trilemma/WITS_API/import_export_total.csv')
+# discern inflow and outflow
+df_import = df_total.loc[lambda df: df.indi == 'MPRT-TRD-VL', : ]
+df_export = df_total.loc[lambda df: df.indi == 'XPRT-TRD-VL', : ]
+
+df_import = df_import.rename(columns = {"partner" : "outflow", "report" : "inflow"})
+df_export = df_export.rename(columns = {"partner" : "inflow", "report" : "outflow"})
+
+# recombine
+df_combined = pd.concat([df_import, df_export])
+df_combined.to_csv('D:/dropbox/Dropbox/LKY_RA/trilemma/WITS_API/combined_total.csv')
